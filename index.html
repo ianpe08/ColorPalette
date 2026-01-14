@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Paleta de colores</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <h1>Paleta de colores</h1>
+
+    <div class="controls">
+        <div class="container_controls">
+            <input type="text" id="colorInput" placeholder="#ff0000">
+            <input type="color" id="colorPicker">
+            <button id="addColor">Agregar</button>
+            <div id="preview"></div>
+        </div>
+    </div>
+    <div class="palette" id="palette"></div>
+
+    <script>
+        const input = document.getElementById("colorInput");
+        const picker = document.getElementById("colorPicker");
+        const preview = document.getElementById("preview");
+        const palette = document.getElementById("palette");
+        const addBtn = document.getElementById("addColor");
+
+        const hexRegex = /^#([0-9A-Fa-f]{3}){1,2}$/;
+        let colors = JSON.parse(localStorage.getItem("colors")) || [];
+
+        function renderPalette() {
+            palette.innerHTML = "";
+            colors.forEach((color, index) => {
+            const div = document.createElement("div");
+            div.className = "color";
+            div.style.backgroundColor = color;
+
+            const label = document.createElement("span");
+            label.textContent = color;
+
+            const del = document.createElement("button");
+            del.textContent = "x";
+            del.onclick = (e) => {
+                e.stopPropagation();
+                colors.splice(index, 1);
+                saveAndRender();
+        };
+
+        div.onclick = () => {
+            navigator.clipboard.writeText(color);
+            alert(`Copiado: ${color}`);
+        };
+
+        div.appendChild(label);
+        div.appendChild(del);
+        palette.appendChild(div);
+        });
+    }
+
+    function saveAndRender() {
+        localStorage.setItem("colors", JSON.stringify(colors));
+        renderPalette();
+    }
+
+    input.addEventListener("input", () => {
+        if (hexRegex.test(input.value)) {
+            preview.style.backgroundColor = input.value;
+        }
+    });
+
+    picker.addEventListener("input", () => {
+        input.value = picker.value;
+        preview.style.backgroundColor = picker.value;
+    });
+
+    addBtn.addEventListener("click", () => {
+        const color = input.value;
+        if (!hexRegex.test(color)) return;
+        colors.push(color);
+        saveAndRender();
+        input.value = "";
+    });
+
+        renderPalette();
+    </script>
+
+</body>
+</html>
